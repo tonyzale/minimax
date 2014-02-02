@@ -1,18 +1,18 @@
-package com.alvinalexander.testproject
+package com.tonyzale.minimax
 
 import org.scalatest.FunSuite
  
-class HelloSuite extends FunSuite {
- 
-  test("the name is set correctly in constructor") {
-    val p = Person("Barney Rubble") 
-    assert(p.name == "Barney Rubble")
+class HelloSuite extends FunSuite {  
+  class TestState extends GameState {
+    def evalForPlayer(id: Int): Double = 0
+    def uid(): Long = 0
+    def validMoves(id: Int): List[this.type] = Nil
   }
- 
-  test("a Person's name can be changed") {
-    val p = Person("Chad Johnson") 
-    p.name = "Ochocinco"
-    assert(p.name == "Ochocinco")
+  
+  test("minimax test") {
+    val testState = new TestState
+    val n = new MiniMaxNode(testState)
+    assert(n.state == testState)
   }
 }
 

@@ -1,9 +1,16 @@
-package com.alvinalexander.testproject
+package com.tonyzale.minimax
 
-object Hello extends App {
-  val p = Person("Alvin Alexander")
-  println("Hello from " + p.name)
+trait GameState {
+  def evalForPlayer(player: Int): Double
+  def validMoves(player: Int): List[this.type]
+  def uid: Long
 }
 
-case class Person(var name: String)
+class MiniMaxNode (val state: GameState){
+  val children: List[MiniMaxNode] = Nil
+  
+}
 
+object Hello extends App {
+	println("hi")
+}
