@@ -2,7 +2,7 @@ package com.tonyzale.minimax
 
 import org.scalatest.FunSuite
  
-class HelloSuite extends FunSuite {  
+class MinimaxSuite extends FunSuite {  
   class TestState extends GameState {
     def evalForPlayer(id: Int): Double = 0
     def uid(): Long = 0
