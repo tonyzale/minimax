@@ -13,13 +13,13 @@ trait GameState {
 
 class MiniMaxNode (val state: GameState){
   lazy val children: List[MiniMaxNode] = state.validMoves.map(new MiniMaxNode(_))
-  def Eval(depth: Int, pid: Minimax.PlayerId): Double = {
-    if (depth == 0) state.evalForPlayer(pid)
+  def Eval(depth: Int, pid: Minimax.PlayerId): GameState = {
+    if (depth == 0) state
     // TODO: fix double eval of winning state
     else if (state.whosTurn == pid) {
-      children.maxBy(_.Eval(depth - 1, pid)).state.evalForPlayer(pid)
+      children.maxBy(_.Eval(depth - 1, pid).evalForPlayer(pid)).state
     } else {
-      children.minBy(_.Eval(depth - 1, pid)).state.evalForPlayer(pid)
+      children.minBy(_.Eval(depth - 1, pid).evalForPlayer(pid)).state
     }
   }
 }
