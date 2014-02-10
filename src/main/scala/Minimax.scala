@@ -20,14 +20,12 @@ class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
     if (depth == 0 || children.isEmpty) {
       if (computedEval.isDefined) this else new MiniMaxNode(state, Some(state.evalForPlayer(pid)))
     } else {
-      def foldFunc(comp: (Double, Double) => Boolean)(a: MiniMaxNode, b: MiniMaxNode): MiniMaxNode = {
-        if (comp(a.computedEval.get, b.computedEval.get)) {
-          a
-        } else {
-          b
-        }
+      val l = children.map(e => if (e.computedEval.isDefined) e else new MiniMaxNode(e.state, e.Eval(depth - 1, pid).computedEval))
+      if (state.whosTurn == pid) {
+        l.maxBy(e => e.computedEval)
+      } else {
+        l.minBy(e => e.computedEval)
       }
-      children.map(e => if (e.computedEval.isDefined) e else new MiniMaxNode(e.state, e.Eval(depth - 1, pid).computedEval)).reduce(if (state.whosTurn == pid) foldFunc((a, b) => a > b) else foldFunc((a, b)=> a < b))
     }
   }
   override def toString: String = {s"MinimaxNode $state $computedEval"}
