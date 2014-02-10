@@ -9,59 +9,37 @@ trait GameState {
   def evalForPlayer(pid: Minimax.PlayerId): Double
   def validMoves: List[GameState]
   def uid: Long
-  override def toString: String = {s"GameState Id $uid $whosTurn ${evalForPlayer(0)}" }
+  override def toString: String = {s"GameState Id:$uid P:$whosTurn eval:${evalForPlayer(0)}" }
 }
 
-class MiniMaxNode (val state: GameState){
+class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
+  def this(state: GameState) = this(state, None)
   lazy val children: List[MiniMaxNode] = state.validMoves.map(new MiniMaxNode(_))
-  lazy val childrenWithEval: List[(MiniMaxNode, Double)] = state.validMoves.map(el => (new MiniMaxNode(el), 0.0))
-  def Eval(depth: Int, pid: Minimax.PlayerId): (GameState, Double) = {
-    if (depth == 0) {
-      println("depth 0 with: " + state)
-      (state, state.evalForPlayer(pid))
-    } else if (state.whosTurn == pid) {
-      println(s"max eval of $state")
-      println(s"children $childrenWithEval")
-      //val result = children.maxBy(_.Eval(depth - 1, pid)._2)
-      
-      val foldResult = childrenWithEval.fold((null, 0.0))((a, b) => {
-        if (a._1 == null) b
-        else {
-          val aResult = a._1.Eval(depth - 1, pid)
-          val bResult = b._1.Eval(depth - 1, pid)
-          if (aResult._2 > bResult._2) {
-            (a._1, aResult._2)
-          } else {
-            (b._1, bResult._2)
-          }
-        }
-      })
-      
-      println(s"**result for $state : $foldResult")
-      (foldResult._1.state, foldResult._2)
+  //lazy val childrenWithEval: List[(MiniMaxNode, Double)] = state.validMoves.map(el => (new MiniMaxNode(el), 0.0))
+  def Eval(depth: Int, pid: Minimax.PlayerId): MiniMaxNode = {
+    if (depth == 0 || children.isEmpty) {
+      if (computedEval.isDefined) this else new MiniMaxNode(state, Some(state.evalForPlayer(pid)))
     } else {
-      println(s"min eval of $state")
-      println(s"children childrenWithEval")
-      //val result = children.minBy(_.Eval(depth - 1, pid)._2).state
-      
-      val foldResult = childrenWithEval.fold((null, 0.0))((a, b) => {
-        if (a._1 == null) b
-        else {
-          val aResult = a._1.Eval(depth - 1, pid)
-          val bResult = b._1.Eval(depth - 1, pid)
-          if (aResult._2 < bResult._2) {
-            (a._1, aResult._2)
+      def foldFunc(comp: (Double, Double) => Boolean)(a:MiniMaxNode, b:MiniMaxNode): MiniMaxNode = {
+        if (a == null) {
+          if (b.computedEval.isDefined) b else b.Eval(depth - 1, pid)
+        } else {
+          val aResult = if (a.computedEval.isDefined) a else new MiniMaxNode(a.state, a.Eval(depth - 1, pid).computedEval)
+          val bResult = if (b.computedEval.isDefined) b else new MiniMaxNode(b.state, b.Eval(depth - 1, pid).computedEval)
+          if (comp(aResult.computedEval.get, bResult.computedEval.get)) {
+            aResult
           } else {
-            (b._1, bResult._2)
+            bResult
           }
-        }
-      })
-      
-      println(s"**result for $state : $foldResult")
-      (foldResult._1.state, foldResult._2)
+        }        
+      }
+      println(s"folding on $state with children: $children")
+      val foldResult = children.fold(null)(if (state.whosTurn == pid) foldFunc((a, b) => a > b) else foldFunc((a, b)=> a < b))
+      println(s"**result for $state: $foldResult")
+      foldResult
     }
   }
-  override def toString: String = {s"Node w/ $state"}
+  override def toString: String = {s"MinimaxNode $state $computedEval"}
 }
 
 class MiniMaxTree(state: GameState, pid: Minimax.PlayerId) {

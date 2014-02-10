@@ -49,7 +49,7 @@ class MinimaxSuite extends FunSuite {
     val a2 = new ConstEvalState(1, 0.0, List(new ConstEvalState(0, 0.5)))
     rootState.children = List(a1, a2)
     val root = new MiniMaxNode(rootState)
-    assert(root.Eval(2, 0)._1 == a2)
+    assert(root.Eval(2, 0).state == a2)
   }
 
   test("minimax solves wikipedia example") {
@@ -72,6 +72,8 @@ class MinimaxSuite extends FunSuite {
     l3c(3).children = l4c.slice(4, 6)
     l3c(4).children = List(l4c(6))
     l3c(5).children = l4c.takeRight(2)
-    assert(new MiniMaxNode(root2).Eval(4, 0)._1 == l1c(1))
+    val rootEval = new MiniMaxNode(root2).Eval(4, 0)
+    assert(rootEval.state == l1c(1))
+    assert(rootEval.computedEval.get == -7)
   }
 }
