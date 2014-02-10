@@ -20,23 +20,14 @@ class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
     if (depth == 0 || children.isEmpty) {
       if (computedEval.isDefined) this else new MiniMaxNode(state, Some(state.evalForPlayer(pid)))
     } else {
-      def foldFunc(comp: (Double, Double) => Boolean)(a:MiniMaxNode, b:MiniMaxNode): MiniMaxNode = {
-        if (a == null) {
-          if (b.computedEval.isDefined) b else b.Eval(depth - 1, pid)
+      def foldFunc(comp: (Double, Double) => Boolean)(a: MiniMaxNode, b: MiniMaxNode): MiniMaxNode = {
+        if (comp(a.computedEval.get, b.computedEval.get)) {
+          a
         } else {
-          val aResult = if (a.computedEval.isDefined) a else new MiniMaxNode(a.state, a.Eval(depth - 1, pid).computedEval)
-          val bResult = if (b.computedEval.isDefined) b else new MiniMaxNode(b.state, b.Eval(depth - 1, pid).computedEval)
-          if (comp(aResult.computedEval.get, bResult.computedEval.get)) {
-            aResult
-          } else {
-            bResult
-          }
-        }        
+          b
+        }
       }
-      println(s"folding on $state with children: $children")
-      val foldResult = children.fold(null)(if (state.whosTurn == pid) foldFunc((a, b) => a > b) else foldFunc((a, b)=> a < b))
-      println(s"**result for $state: $foldResult")
-      foldResult
+      children.map(e => if (e.computedEval.isDefined) e else new MiniMaxNode(e.state, e.Eval(depth - 1, pid).computedEval)).reduce(if (state.whosTurn == pid) foldFunc((a, b) => a > b) else foldFunc((a, b)=> a < b))
     }
   }
   override def toString: String = {s"MinimaxNode $state $computedEval"}
