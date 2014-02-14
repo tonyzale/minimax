@@ -10,12 +10,12 @@ trait GameState {
   def validMoves: List[GameState]
   def uid: Long
   override def toString: String = {s"GameState Id:$uid P:$whosTurn eval:${evalForPlayer(0)}" }
+  def PrettyPrint = println(this.toString)
 }
 
 class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
   def this(state: GameState) = this(state, None)
   lazy val children: List[MiniMaxNode] = state.validMoves.map(new MiniMaxNode(_))
-
   def Eval(depth: Int, pid: Minimax.PlayerId): MiniMaxNode = {
     if (depth == 0 || children.isEmpty) {
       if (computedEval.isDefined) this else new MiniMaxNode(state, Some(state.evalForPlayer(pid)))
@@ -34,6 +34,8 @@ class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
 class MiniMaxTree(state: GameState, pid: Minimax.PlayerId) {
   val root = new MiniMaxNode(state)
 }
+
+class TwoPlayerFramework(startState: GameState)
 
 object Hello extends App {
 	println("hi")

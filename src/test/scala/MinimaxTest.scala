@@ -76,4 +76,9 @@ class MinimaxSuite extends FunSuite {
     assert(rootEval.state == l1c(1))
     assert(rootEval.computedEval.get == -7)
   }
+  
+  test("tic tac toe") {
+    val state = new TicTacToeState(new TicTacToePlayer(0), TicTacToeState.emptyBoard)
+    state.PrettyPrint
+  }
 }
