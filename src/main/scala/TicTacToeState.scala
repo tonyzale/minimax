@@ -9,7 +9,7 @@ case class SquareState(owner: Option[TicTacToePlayer]) {
 
 object TicTacToeState {
   type Board = Vector[ Vector[SquareState] ]
-  val unowned = SquareState(null)
+  val unowned = SquareState(None)
   val emptyBoard = Vector(Vector(unowned, unowned, unowned), Vector(unowned, unowned, unowned), Vector(unowned, unowned, unowned))
   val p1 = TicTacToePlayer(0)
   val p2 = TicTacToePlayer(1)
@@ -35,14 +35,27 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
     if (board(0)(2) == board(1)(1) && board(0)(2) == board(2)(0) && board(0)(2) != TicTacToeState.unowned) {
     	return board(0)(2).owner
     }
-    null
+    None
   }
-  def validMoves: List[GameState] = Nil
+  lazy val validMoves: List[GameState] = {
+    var moves: List[TicTacToeState] = Nil
+    val nextPlayer = if (playerTurn == TicTacToeState.p1) TicTacToeState.p2 else TicTacToeState.p1
+    for (i <- 0 to 2) {
+      for (j <- 0 to 2) {
+        if (board(i)(j).owner.isEmpty) {
+          val newBoard = board.updated(i, board(i).updated(j, SquareState(Option(nextPlayer))))
+          moves = new TicTacToeState(nextPlayer, newBoard) :: moves
+        }
+      }
+    }
+    moves
+  }
   def uid: Long = {
     board.flatMap(_.map(_.char)).reduce((a, b) => a + b).hashCode
   }
   override def PrettyPrint = {
     board.foreach(r => {r.foreach(c => print(c.char)); println("");})
+    println("***")
   }
   assert(board.length == 3)
   assert(board(0).length == 3)

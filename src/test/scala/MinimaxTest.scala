@@ -80,5 +80,8 @@ class MinimaxSuite extends FunSuite {
   test("tic tac toe") {
     val state = new TicTacToeState(new TicTacToePlayer(0), TicTacToeState.emptyBoard)
     state.PrettyPrint
+    state.validMoves.foreach(_.PrettyPrint)
+    println("CHILD MOVES")
+    state.validMoves(0).validMoves.foreach(_.PrettyPrint)
   }
 }
