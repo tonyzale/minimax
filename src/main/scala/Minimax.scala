@@ -31,10 +31,6 @@ class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
   override def toString: String = {s"MinimaxNode $state $computedEval"}
 }
 
-class MiniMaxTree(state: GameState, pid: Minimax.PlayerId) {
-  val root = new MiniMaxNode(state)
-}
-
 class TwoPlayerFramework(startState: GameState)
 
 object Hello extends App {
