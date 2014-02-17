@@ -70,5 +70,8 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
   assert(board(0).length == 3)
   assert(board(1).length == 3)
   assert(board(2).length == 3)
-  
+}
+
+object PlayTicTacToe extends App {
+	Minimax.Play(TicTacToeState.startState)
 }

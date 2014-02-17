@@ -43,8 +43,3 @@ class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
   }
   override def toString: String = {s"MinimaxNode $state $computedEval"}
 }
-
-object Hello extends App {
-	println("hi")
-	Minimax.Play(TicTacToeState.startState)
-}
