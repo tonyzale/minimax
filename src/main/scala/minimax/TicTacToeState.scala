@@ -13,12 +13,17 @@ object TicTacToeState {
   val emptyBoard = Vector(Vector(unowned, unowned, unowned), Vector(unowned, unowned, unowned), Vector(unowned, unowned, unowned))
   val p1 = TicTacToePlayer(0)
   val p2 = TicTacToePlayer(1)
+  val startState = new TicTacToeState(p1, emptyBoard)
 }
 
 class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[SquareState]]) extends GameState {
   def whosTurn: Minimax.PlayerId = playerTurn.pid
   def evalForPlayer(pid: Minimax.PlayerId): Double = {
-    winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(0)
+    val eval = winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(0.0)
+    //val eval = winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(board(1)(1).owner.map(x => if (x.pid == pid) 0.5 else -0.5).getOrElse(0.0))
+    //println(s"Eval: ${eval}")
+    //PrettyPrint
+    eval
   }
   def winForPlayer(): Option[TicTacToePlayer] = {
     for (i <- 0 to 2) {
@@ -38,17 +43,21 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
     None
   }
   lazy val validMoves: List[GameState] = {
-    var moves: List[TicTacToeState] = Nil
-    val nextPlayer = if (playerTurn == TicTacToeState.p1) TicTacToeState.p2 else TicTacToeState.p1
-    for (i <- 0 to 2) {
-      for (j <- 0 to 2) {
-        if (board(i)(j).owner.isEmpty) {
-          val newBoard = board.updated(i, board(i).updated(j, SquareState(Option(nextPlayer))))
-          moves = new TicTacToeState(nextPlayer, newBoard) :: moves
-        }
+    if (winForPlayer.isDefined) {
+      Nil
+    } else {
+      var moves: List[TicTacToeState] = Nil
+      val nextPlayer = if (playerTurn == TicTacToeState.p1) TicTacToeState.p2 else TicTacToeState.p1
+      for (i <- 0 to 2) {
+    	  for (j <- 0 to 2) {
+    		  if (board(i)(j).owner.isEmpty) {
+    			val newBoard = board.updated(i, board(i).updated(j, SquareState(Option(playerTurn))))
+    			moves = new TicTacToeState(nextPlayer, newBoard) :: moves
+    		  }
+    	  }
       }
+      moves
     }
-    moves
   }
   def uid: Long = {
     board.flatMap(_.map(_.char)).reduce((a, b) => a + b).hashCode
