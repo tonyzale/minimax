@@ -69,5 +69,5 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
 }
 
 object PlayTicTacToe extends App {
-	Minimax.Play(TicTacToeState.startState, (s: TicTacToeState, pid: Minimax.PlayerId) => 0.0)
+	Minimax.Play(TicTacToeState.startState, TicTacToeState.evalForPlayer)
 }
