@@ -4,42 +4,34 @@ import scala.annotation.tailrec
 object Minimax {
   type PlayerId = Int
 
-  @tailrec def Play(state: GameState) {
-    val node = new MiniMaxNode(state)
+  @tailrec def Play[T <: GameState[T]](state: T, evalFunc: (T, Minimax.PlayerId) => Double) {
+    val node = new MiniMaxNode(state.whosTurn, state, 4, evalFunc)
     println(s"${state.whosTurn} Turn:")
-    val nextState: GameState = node.Eval(4, state.whosTurn).state
+    val nextState: T = node.eval._1
     println("#####")
     nextState.PrettyPrint
     println("#####")
-    if (!nextState.validMoves.isEmpty) Play(nextState)
+    if (!nextState.validMoves.isEmpty) Play(nextState, evalFunc)
   }
 }
 
-trait GameState {
+trait GameState[T <: GameState[T]] {
   def whosTurn: Minimax.PlayerId
-  def evalForPlayer(pid: Minimax.PlayerId): Double
-  def validMoves: List[GameState]
+  def validMoves: List[T]
   def uid: Long
-  override def toString: String = {s"GameState Id:$uid P:$whosTurn eval:${evalForPlayer(0)}" }
+  override def toString: String = {s"{Id:$uid P:$whosTurn}" }
   def PrettyPrint = println(this.toString)
 }
 
-class MiniMaxNode (val state: GameState, val computedEval: Option[Double]){
-  def this(state: GameState) = this(state, None)
-  lazy val children: List[MiniMaxNode] = state.validMoves.map(new MiniMaxNode(_))
-  def Eval(depth: Int, pid: Minimax.PlayerId): MiniMaxNode = {
-    //println(s"depth $depth eval for $pid")
+class MiniMaxNode[T <: GameState[T]] (val pid: Minimax.PlayerId, val state: T, val depth: Int, val evalFunc: (T, Minimax.PlayerId) => Double){
+  lazy val children: List[MiniMaxNode[T]] = state.validMoves.map(c => new MiniMaxNode(pid, c, depth - 1, evalFunc))
+  lazy val eval: (T, Double) = {
     if (depth == 0 || children.isEmpty) {
-      if (computedEval.isDefined) this else new MiniMaxNode(state, Some(state.evalForPlayer(pid)))
+      (state, evalFunc(state, pid))
     } else {
-      val l = children.map(e => if (e.computedEval.isDefined) e else new MiniMaxNode(e.state, e.Eval(depth - 1, pid).computedEval))
-      // println(s"child len/vals: ${l.length} $l")
-      if (state.whosTurn == pid) {
-        l.maxBy(e => e.computedEval)
-      } else {
-        l.minBy(e => e.computedEval)
-      }
+      val winningChild = if (state.whosTurn == pid) children.maxBy(_.eval._2) else children.minBy(_.eval._2)
+      (winningChild.state, winningChild.eval._2)
     }
   }
-  override def toString: String = {s"MinimaxNode $state $computedEval"}
+  override def toString: String = {s"[MinimaxNode $state $eval]"}
 }

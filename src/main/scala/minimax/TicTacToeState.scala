@@ -14,17 +14,13 @@ object TicTacToeState {
   val p1 = TicTacToePlayer(0)
   val p2 = TicTacToePlayer(1)
   val startState = new TicTacToeState(p1, emptyBoard)
+  def evalForPlayer(state: TicTacToeState, pid: Minimax.PlayerId): Double = {
+    state.winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(0.0)
+  }
 }
 
-class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[SquareState]]) extends GameState {
+class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[SquareState]]) extends GameState[TicTacToeState] {
   def whosTurn: Minimax.PlayerId = playerTurn.pid
-  def evalForPlayer(pid: Minimax.PlayerId): Double = {
-    val eval = winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(0.0)
-    //val eval = winForPlayer().map(x => if (x.pid == pid) 1.0 else -1.0).getOrElse(board(1)(1).owner.map(x => if (x.pid == pid) 0.5 else -0.5).getOrElse(0.0))
-    //println(s"Eval: ${eval}")
-    //PrettyPrint
-    eval
-  }
   def winForPlayer(): Option[TicTacToePlayer] = {
     for (i <- 0 to 2) {
     	if (board(i)(0) == board(i)(1) && board(i)(0) == board(i)(2) && board(i)(0) != TicTacToeState.unowned) {
@@ -42,7 +38,7 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
     }
     None
   }
-  lazy val validMoves: List[GameState] = {
+  lazy val validMoves: List[TicTacToeState] = {
     if (winForPlayer.isDefined) {
       Nil
     } else {
@@ -73,5 +69,5 @@ class TicTacToeState(playerTurn: TicTacToePlayer, val board: Vector[Vector[Squar
 }
 
 object PlayTicTacToe extends App {
-	Minimax.Play(TicTacToeState.startState)
+	Minimax.Play(TicTacToeState.startState, (s: TicTacToeState, pid: Minimax.PlayerId) => 0.0)
 }
